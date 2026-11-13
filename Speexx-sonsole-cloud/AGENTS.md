@@ -392,6 +392,17 @@ tail -f ~/speexx_autocycle_multi/session1_*.log.console
 Note the master log's final two lines are easy to misread: `stop_all()` logs "All sessions
 stopped" whenever the trap fires, including when a tool/test harness kills the supervisor.
 
+**Auto-stop on the "no entry found" loop (exit code 5):** if `open_exercises()`
+fails 10 times in a row (~70 s of `no entry found (may be mid-load), waiting` →
+`home/root ... -> open exercises` spinning), the session logs
+`open_exercises failed 10 times in a row — stopping this session` and exits with
+code 5; `multi_run.sh` then stops that ONE session permanently (`open_exercises
+loop detected — stopping this session` in its session log) instead of cycling a
+stuck account forever. Any successful entry (or a packet page) resets the
+streak, so transient mid-load misses never trigger it. Tune/disable with
+`SPEEXX_OPEN_EMPTY_MAX` (0 = never auto-stop). If a session stops this way the
+account genuinely has no course entry to open — fix the cause, then rerun.
+
 ### Docker
 
 **Not used here, deliberately.** There is no Dockerfile; sessions run the local `.venv`
