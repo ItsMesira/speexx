@@ -17,3 +17,6 @@ web/node_modules/
 # Tool noise
 .DS_Store
 .opencode/
+
+# Local runbook (may hold account hints / tokens)
+RUNNING.md
