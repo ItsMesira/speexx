@@ -149,6 +149,16 @@ if _SOLVER_NO_BOUNCE == SOLVER:
 # not registering an exercise as complete before it advances.
 PRON_INTERVAL = 1.5
 
+# Auto-stop for the "no entry found" loop: open_exercises() failing this many
+# times IN A ROW (each failure is ~7 s of waiting) means the account has no
+# course entry to open and the session would just spin home -> open exercises
+# forever. The session exits with code 5, and multi_run.sh stops that session
+# permanently on it (logged as such in the session log). Transient mid-load
+# misses are fine: two failures in a row is normal, 10 is a stuck account.
+# Override or disable with SPEEXX_OPEN_EMPTY_MAX (0 = never auto-stop).
+OPEN_EMPTY_MAX = int(os.environ.get("SPEEXX_OPEN_EMPTY_MAX", "10") or "10")
+_open_empty = 0
+
 DELAYS = {
     "poll": 1.0,        # fast observation tick when deciding what to do
     "after_login": 7.0,
@@ -425,6 +435,7 @@ def stop_controller(page):
 # ── Course entry ───────────────────────────────────────────────────────────
 def open_exercises(page):
     """From home / article root, go into a standard packet (avoids /support)."""
+    global _open_empty
     # Give SPA links a chance to render before giving up.
     for _ in range(3):
         if page.locator('a[href*="standard-packet"], a[href*="pronunciation-packet"]').count():
@@ -441,6 +452,7 @@ def open_exercises(page):
         if not re.search(r"/articles/\d+/standard", path):
             continue
         log("open exercises -> %s" % path)
+        _open_empty = 0
         try:
             page.goto(target, timeout=30000, wait_until="domcontentloaded")
         except Exception as e:
@@ -459,11 +471,13 @@ def open_exercises(page):
             if re.search(r"continue|opstart|start|เข้าสู่บทเรียน", txt, re.I):
                 el.click(timeout=1500)
                 log("open exercises -> clicked %r" % txt[:30])
+                _open_empty = 0
                 time.sleep(DELAYS["after_enter"])
                 return True
         except Exception:
             continue
     log("open_exercises: no entry found (may be mid-load), waiting")
+    _open_empty += 1
     return False
 
 
@@ -494,6 +508,7 @@ def handle_pronunciation(page, ordinal=None):
 # ── main loop ──────────────────────────────────────────────────────────────
 def main(username, password, max_steps=None, runtime=None,
          device_profile=0, profile_dir=None):
+    global _open_empty
     prof = DEVICE_PROFILES[device_profile % len(DEVICE_PROFILES)]
     profile = profile_dir or default_profile_dir(username)
     started = time.time()
@@ -564,9 +579,18 @@ def main(username, password, max_steps=None, runtime=None,
             kind = url_kind(url)
             ordinal = url_ordinal(url)
 
+            if kind is not None:
+                _open_empty = 0  # a packet page breaks any no-entry streak
+
             if kind is None:
                 log("home/root (%s) -> open exercises" % url)
                 open_exercises(page)
+                if OPEN_EMPTY_MAX and _open_empty >= OPEN_EMPTY_MAX:
+                    log("open_exercises failed %d times in a row — stopping "
+                        "this session (exit 5, supervisor will not restart "
+                        "it). Disable with SPEEXX_OPEN_EMPTY_MAX=0."
+                        % _open_empty)
+                    sys.exit(5)
                 time.sleep(DELAYS["poll"])
                 continue
 

@@ -61,6 +61,14 @@ run_session() {
                 --runtime "$cycle_runtime" --device-profile "$profile" \
                 > "${logfile}.console" 2>&1
             status=$?
+            if [ "$status" -eq 5 ]; then
+                # speexx_autocycle.py found no course entry OPEN_EMPTY_MAX
+                # times in a row: this account has nothing to open, so
+                # cycling would just spin. Stop THIS session permanently.
+                echo "$(date '+%Y-%m-%d %H:%M:%S') open_exercises loop detected — stopping this session (no more cycles)" >> "$logfile"
+                log "session $name stopped: open_exercises loop (exit 5)"
+                break
+            fi
             elapsed=$((elapsed + cycle_runtime))
             [ "$elapsed" -ge "$RUNTIME" ] && break
             if [ "$status" -ne 0 ]; then
