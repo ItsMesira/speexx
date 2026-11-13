@@ -36,11 +36,13 @@ cd panel-lite
 ## Run both at once
 
 ```bash
-bash run_all.sh            # panel (public URL when possible) + all bot accounts, 3.5 h
+bash run_all.sh            # panel-lite (public URL when possible) + all bot accounts, 3.5 h
 bash run_all.sh 7200       # 2 h bot window
 bash run_all.sh stop       # stop both
 ```
 
+The panel in this one-command flow is **panel-lite** (port 8788): no users, no
+keys — it prints an access token once when a tunnel is up; paste it on the page.
 It writes `Accounts.md` from the `SPEEXX_ACCOUNTS` secret if you have one, builds
 whichever environment is missing, starts the panel first (prints the public URL or
 the Codespaces port-forward hint), then the bot. On Colab/Kaggle open
@@ -92,6 +94,10 @@ Browser runs headless automatically (no display in a codespace). Device profiles
 like distinct devices — do not reduce the 15 s stagger.
 
 ### Run the panel
+
+`run_all.sh` starts **panel-lite** (port 8788) — see the Panel Lite section
+above. The full multi-user panel below is still available when you want
+accounts/keys for several people; it is not part of the one-command flow.
 
 ```bash
 cd panel-cloud

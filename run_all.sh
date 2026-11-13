@@ -1,21 +1,23 @@
 #!/usr/bin/env bash
-# run_all.sh — start BOTH projects in one command: the panel (with a public URL
-# when possible) and the AutoCycle bot for every account in Accounts.md.
+# run_all.sh — start BOTH projects in one command: the single-operator panel
+# (panel-lite, with a public URL when possible) and the AutoCycle bot for
+# every account in Accounts.md.
 #
 # Usage:
-#   bash run_all.sh              # bot: 3.5 h window; panel: 8787 + tunnel
+#   bash run_all.sh              # bot: 3.5 h window; panel-lite: 8788 + tunnel
 #   bash run_all.sh 7200         # bot: 2 h window
 #   bash run_all.sh stop         # stop both projects
 #
 # Accounts come from the SPEEXX_ACCOUNTS secret (one "email password" per line)
 # or from Speexx-sonsole-cloud/Accounts.md (gitignored — never commit it).
-# The tunnel uses NGROK_AUTHTOKEN when set; in Codespaces the built-in port
-# forward on 8787 works without it.
+# The tunnel uses NGROK_AUTHTOKEN when set; in Codespaces a PRIVATE forwarded
+# port on 8788 needs no token at all.
 set -uo pipefail
 cd "$(dirname "$0")"
 
 SONSOLE="Speexx-sonsole-cloud"
-PANEL="panel-cloud"
+PANEL="panel-lite"
+PORT=8788
 
 if [ "${1:-}" = "stop" ]; then
   (cd "$SONSOLE" && ./stop.sh)
@@ -45,28 +47,39 @@ fi
 if [ ! -x "$SONSOLE/.venv/bin/python" ]; then
   bash "$SONSOLE/cloud_setup.sh" || exit 1
 fi
-if [ ! -x "$PANEL/.venv/bin/python" ]; then
-  bash "$PANEL/cloud_setup.sh" || exit 1
-fi
+# panel-lite builds its own venv inside run.sh (first run only); nothing to
+# do here — but its first build + Chromium download can take a few minutes,
+# which is why the URL wait below is generous.
 
-# ---- panel ------------------------------------------------------------------
-URL_FILE="$PANEL/data/tunnel-url.txt"
+# ---- panel-lite ---------------------------------------------------------------
+URL_FILE="$PANEL/lite_data/tunnel-url.txt"
 rm -f "$URL_FILE"
-(cd "$PANEL" && nohup ./run.sh 8787 --with-tunnel > /tmp/speexx-panel.log 2>&1 &)
-for _ in $(seq 1 60); do
+(cd "$PANEL" && nohup ./run.sh "$PORT" > /tmp/speexx-panel.log 2>&1 &)
+for _ in $(seq 1 150); do
   [ -s "$URL_FILE" ] && break
+  # first-run venv build prints progress into the log; a hard failure ends it
+  grep -q "ERROR" /tmp/speexx-panel.log 2>/dev/null && break
   sleep 2
 done
 
 echo ""
-echo "[run-all] panel running on http://127.0.0.1:8787"
+echo "[run-all] panel running on http://127.0.0.1:$PORT"
 if [ -s "$URL_FILE" ]; then
   echo "[run-all] public URL: $(cat "$URL_FILE" | tr -d '\n')"
   echo "[run-all]   ngrok shows a 'Visit Site' warning page once per browser"
+  TOKEN="$(grep -A1 'shown ONCE' /tmp/speexx-panel.log 2>/dev/null | tail -1 | awk '{print $NF}')"
+  if [ -n "$TOKEN" ]; then
+    echo "[run-all] panel access token (paste once on the page): $TOKEN"
+  fi
+elif grep -q "ERROR" /tmp/speexx-panel.log 2>/dev/null; then
+  echo "[run-all] panel failed to start — last log lines:"
+  tail -n 8 /tmp/speexx-panel.log
 elif [ -n "${CODESPACES:-}" ]; then
-  echo "[run-all] open the Ports panel -> port 8787 (set it to Public for phones)"
+  echo "[run-all] open the Ports panel -> port $PORT (keep it Private — that IS the access control)"
+  echo "[run-all] it is still building its venv; give it a minute, then check /tmp/speexx-panel.log"
 else
   echo "[run-all] no tunnel URL — set NGROK_AUTHTOKEN for a public address"
+  echo "[run-all] panel log: tail -f /tmp/speexx-panel.log"
 fi
 
 # ---- bot --------------------------------------------------------------------
