@@ -12,6 +12,19 @@ bot logic here is byte-identical to them, only the environment layer differs.
 Per-project docs: `Speexx-sonsole-cloud/CLOUD.md`, `panel-cloud/CLOUD.md`, plus
 the full behavior reference in each folder's `AGENTS.md`.
 
+## Run both at once
+
+```bash
+bash run_all.sh            # panel (public URL when possible) + all bot accounts, 3.5 h
+bash run_all.sh 7200       # 2 h bot window
+bash run_all.sh stop       # stop both
+```
+
+It writes `Accounts.md` from the `SPEEXX_ACCOUNTS` secret if you have one, builds
+whichever environment is missing, starts the panel first (prints the public URL or
+the Codespaces port-forward hint), then the bot. On Colab/Kaggle open
+`run_both_cloud.ipynb` at the repo root and run it top to bottom instead.
+
 ## Codespaces: first run
 
 The devcontainer builds both environments automatically (venvs, Playwright
