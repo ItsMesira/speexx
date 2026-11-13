@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard — Speexx Panel</title>
+    <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/fonts.css" />
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div class="marquee" role="presentation">
+      <div class="marquee-track" data-marquee>
+        <span class="marquee-item">One whole level, then done <span class="marquee-dot"></span></span>
+        <span class="marquee-item">Runs keep themselves apart <span class="marquee-dot"></span></span>
+        <span class="marquee-item">Passwords never reach a log <span class="marquee-dot"></span></span>
+      </div>
+    </div>
+
+    <header class="nav-shell">
+      <nav class="shell flex flex-wrap items-center gap-3 py-4 md:gap-4">
+        <a href="/dashboard" class="flex items-center gap-3 no-underline">
+          <span class="flex h-11 w-11 items-center justify-center rounded-full border border-carbon bg-paper-white font-display text-[22px] leading-none">P</span>
+          <span class="tag hidden sm:inline">Dashboard</span>
+        </a>
+        <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+          <span class="chip hidden" id="levels-left">0 levels left</span>
+          <span class="chip" id="who">…</span>
+          <a class="nav-pill hidden md:inline-flex" href="/" hidden id="adminlink">Admin</a>
+          <button class="btn btn-ghost" type="button" id="signout">Sign out</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <!-- ── The run in progress, or the state of the last one ────────── -->
+      <section class="band-sky">
+        <div class="shell pt-14 pb-16 md:pt-16 md:pb-20">
+          <div class="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <h1 class="display select-none" id="headline">RUN IT.</h1>
+              <p class="lede mt-6 max-w-[42ch]" id="lede">
+                Pick a saved account below and press run. It works through a whole level, then
+                stops on its own.
+              </p>
+            </div>
+            <span id="state-slot"></span>
+          </div>
+
+          <div class="mt-12 grid gap-8 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:gap-12">
+            <div class="flex flex-col gap-4">
+              <div class="card card-sky">
+                <p class="tag">Packets this level</p>
+                <p class="display mt-2 tnum" id="packets">00</p>
+                <p class="tag mt-4" id="levels">Level 1 of 1</p>
+                <p class="mt-3 text-[13px] leading-[1.5] text-carbon/80" id="job-email">
+                  Nothing running.
+                </p>
+              </div>
+              <div class="card">
+                <p class="tag">Started</p>
+                <p class="mt-2 text-[15px] font-medium tnum" id="started">—</p>
+                <button class="btn btn-ghost mt-5 w-full" type="button" id="stop" disabled>
+                  Stop this run
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div class="rule-head !mt-0 !mb-4 !border-0 !pt-0">
+                <p class="tag">Output</p>
+                <p class="tag text-carbon/60" id="log-note">Nothing has run yet.</p>
+              </div>
+              <div class="logbox" id="log" tabindex="0" role="log" aria-live="polite" aria-label="Run output"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Saved accounts ────────────────────────────────────────────── -->
+      <section class="band-white">
+        <div class="shell py-16 md:py-24">
+          <div class="rule-head">
+            <h2 class="display-sm max-w-[22ch]">Your Speexx accounts.</h2>
+            <span class="tag text-carbon/60" id="account-count"></span>
+          </div>
+
+          <div id="gate" class="card card-lav mb-8 hidden">
+            <div class="flex flex-wrap items-end justify-between gap-6">
+              <div class="max-w-[46ch]">
+                <p class="tag text-carbon/70">Run key</p>
+                <h3 class="display-sm mt-2">You need a key.</h3>
+                <p class="mt-3 text-[14px] leading-[1.5] text-carbon/85" id="gate-note">
+                  You can save a login and look around. Running needs a six digit
+                  key from the admin — each one buys you a single level.
+                </p>
+              </div>
+              <form class="flex flex-wrap items-end gap-3" id="key-form" novalidate>
+                <label class="block">
+                  <span class="tag text-carbon/70">Six digits</span>
+                  <input class="field mt-2 tnum tracking-[0.34em]" id="key-code"
+                         name="code" inputmode="numeric" autocomplete="one-time-code"
+                         pattern="[0-9]*" maxlength="6" placeholder="000000" />
+                </label>
+                <button class="btn btn-filled" type="submit" id="key-submit">Add a level</button>
+              </form>
+            </div>
+            <div id="gate-msg" class="mt-4"></div>
+          </div>
+
+          <div id="accounts" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3"></div>
+
+          <!-- Add form: a panel, not a modal, so it is always findable. -->
+          <form class="card card-lav mt-8" id="add-form" novalidate>
+            <div class="flex flex-wrap items-end gap-5">
+              <label class="flex min-w-[14rem] flex-1 flex-col gap-2">
+                <span class="tag">Speexx email</span>
+                <input class="field" type="email" id="a-email" spellcheck="false" required
+                       maxlength="254" placeholder="learner@school.ac.th" />
+              </label>
+              <label class="flex min-w-[13rem] flex-1 flex-col gap-2">
+                <span class="tag">Speexx password</span>
+                <input class="field" type="password" id="a-pass" autocomplete="off" required
+                       maxlength="200" placeholder="••••••••••" />
+              </label>
+              <label class="flex min-w-[9rem] flex-col gap-2">
+                <span class="tag">Label <span class="normal-case tracking-normal opacity-70">(optional)</span></span>
+                <input class="field" type="text" id="a-label" maxlength="60" placeholder="school" />
+              </label>
+              <button class="btn btn-filled" type="submit" id="a-submit">Save account</button>
+            </div>
+            <div id="add-msg" class="mt-5"></div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ── History ───────────────────────────────────────────────────── -->
+      <section class="band-gray">
+        <div class="shell py-16 md:py-24">
+          <div class="rule-head">
+            <h2 class="display-sm max-w-[22ch]">Recent runs.</h2>
+            <span class="tag text-carbon/60" id="history-note"></span>
+          </div>
+          <div id="history" class="flex flex-col gap-3"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/dashboard.js" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Speexx Panel — one whole level, then done</title>
+    <meta
+      name="description"
+      content="Save your Speexx login once, then let it work through a whole level by itself and stop."
+    />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/fonts.css" />
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <!--
+      THESIS: the hard part was never the logging in — it was stopping at the
+      right moment. The panel owns one promise: a whole level, then done, with no
+      session left hanging and no button to remember.
+      OWN-WORLD: pastel paper ground, one inflatable electric-blue ribbon, six
+      saturated sticker accents, 1px black hand-cut outlines, pill controls,
+      Anton display crushed to 0.78 leading, and no shadows anywhere.
+      STORY: save a Speexx login once, press run, watch packets tick up through
+      the level, get told DONE when it runs out.
+      FIRST VIEWPORT: black marquee, then the sky-wash hero with "ONE LEVEL."
+      crushed under an arcing ribbon and stickers overlapping the type; the two
+      account actions — sign up, sign in — sit directly beneath it, pill and
+      black-filled. Nothing else competes above the fold.
+      FORM: sticker-book collage, full-bleed colour bands, asymmetric
+      placement, one authored SVG ribbon, zero photography.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the
+      finish review, the verdict, DESIGN.md, and every shipping raster carrying
+      its provenance.
+    -->
+
+    <svg width="0" height="0" aria-hidden="true" class="deco">
+      <defs>
+        <filter id="grain-landing" x="-12%" y="-12%" width="124%" height="124%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <symbol id="st-rocket" viewBox="0 0 64 64">
+          <path d="M32 6c9 8 13 18 13 28v10H19V34C19 24 23 14 32 6Z" fill="#fb4903" stroke="#000" stroke-width="2.5" stroke-linejoin="round" />
+          <circle cx="32" cy="26" r="6" fill="#dceeff" stroke="#000" stroke-width="2.5" />
+          <path d="M19 34 9 44v10l10-6M45 34l10 10v10l-10-6" fill="#ffd731" stroke="#000" stroke-width="2.5" stroke-linejoin="round" />
+          <path d="M26 44h12l-6 14Z" fill="#55db9c" stroke="#000" stroke-width="2.5" stroke-linejoin="round" />
+        </symbol>
+        <symbol id="st-coin" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="25" fill="#ffd731" stroke="#000" stroke-width="2.5" />
+          <circle cx="32" cy="32" r="16" fill="#e9ccff" stroke="#000" stroke-width="2.5" />
+          <path d="M32 21v22M25 27h14M25 37h14" stroke="#000" stroke-width="3" stroke-linecap="round" />
+        </symbol>
+        <symbol id="st-lock" viewBox="0 0 64 64">
+          <rect x="12" y="28" width="40" height="28" rx="7" fill="#e9ccff" stroke="#000" stroke-width="2.5" />
+          <path d="M21 28v-8a11 11 0 0 1 22 0v8" fill="none" stroke="#000" stroke-width="2.5" />
+          <circle cx="32" cy="41" r="4.5" fill="#000" />
+        </symbol>
+        <symbol id="st-check" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="25" fill="#55db9c" stroke="#000" stroke-width="2.5" />
+          <path d="M20 33l9 9 16-18" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+        </symbol>
+        <symbol id="st-flag" viewBox="0 0 64 64">
+          <path d="M18 58V8" stroke="#000" stroke-width="3" stroke-linecap="round" fill="none" />
+          <path d="M18 10h30l-7 10 7 10H18Z" fill="#55db9c" stroke="#000" stroke-width="2.5" stroke-linejoin="round" />
+        </symbol>
+      </defs>
+    </svg>
+
+    <div class="marquee" role="presentation">
+      <div class="marquee-track" data-marquee>
+        <span class="marquee-item">Save your login once <span class="marquee-dot"></span></span>
+        <span class="marquee-item">One whole level, then done <span class="marquee-dot"></span></span>
+        <span class="marquee-item">Wrong password stops dead <span class="marquee-dot"></span></span>
+        <span class="marquee-item">No button to remember <span class="marquee-dot"></span></span>
+      </div>
+    </div>
+
+    <header class="nav-shell">
+      <nav class="shell flex flex-wrap items-center gap-3 py-4 md:gap-4">
+        <a href="/" class="flex items-center gap-3 no-underline">
+          <span class="flex h-11 w-11 items-center justify-center rounded-full border border-carbon bg-paper-white font-display text-[22px] leading-none text-carbon">P</span>
+          <span class="tag hidden sm:inline">Speexx Panel</span>
+        </a>
+        <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+          <a class="nav-pill" href="/login">Sign in</a>
+          <a class="btn btn-filled" href="/signup">Get an account</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="band-sky relative overflow-hidden">
+        <div class="shell relative pt-14 pb-16 md:pt-16 md:pb-24">
+          <div class="relative">
+            <svg class="deco pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 1200 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <g filter="url(#grain-landing)">
+                <path d="M-40 200C220 200 300 58 620 58s320 128 620 96" fill="none" stroke="#000" stroke-width="86" stroke-linecap="round" />
+                <path d="M-40 200C220 200 300 58 620 58s320 128 620 96" fill="none" stroke="#2f7fd1" stroke-width="78" stroke-linecap="round" />
+                <path d="M-40 200C220 200 300 58 620 58s320 128 620 96" fill="none" stroke="#4da2ff" stroke-width="68" stroke-linecap="round" />
+                <path d="M-40 188C220 188 300 46 620 46s320 128 620 96" fill="none" stroke="#6bb6ff" stroke-width="26" stroke-linecap="round" />
+                <path d="M-40 182C220 182 300 40 620 40s320 128 620 96" fill="none" stroke="#a8d8ff" stroke-width="8" stroke-linecap="round" />
+              </g>
+            </svg>
+            <h1 class="display relative select-none">ONE LEVEL.</h1>
+            <svg class="deco absolute left-[58%] top-[4%] h-14 w-14 -rotate-12 md:h-[74px] md:w-[74px]" viewBox="0 0 64 64" aria-hidden="true"><use href="#st-rocket" /></svg>
+            <svg class="deco absolute right-[4%] top-[48%] h-12 w-12 rotate-12 md:h-16 md:w-16" viewBox="0 0 64 64" aria-hidden="true"><use href="#st-coin" /></svg>
+          </div>
+
+          <div class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-end lg:gap-16">
+            <div class="max-w-[44ch]">
+              <p class="lede">
+                Save your Speexx login once. Press run. It works through every packet in a whole
+                level, then stops by itself and says done — nothing left hanging, no button to
+                remember.
+              </p>
+              <div class="mt-8 flex flex-wrap items-center gap-3">
+                <a class="btn btn-filled" href="/signup">Get an account</a>
+                <a class="btn btn-ghost" href="/login">I already have one</a>
+              </div>
+            </div>
+
+            <div class="card card-lav">
+              <div class="flex items-center gap-3">
+                <svg class="deco h-12 w-12 -rotate-6" viewBox="0 0 64 64" aria-hidden="true"><use href="#st-lock" /></svg>
+                <h2 class="display-sm">You keep the key.</h2>
+              </div>
+              <p class="mt-4 text-[14px] leading-[1.5]">
+                Your Speexx password is encrypted on disk and never written to a log, a URL, or
+                the page. It is decrypted for the few seconds a run starts, then dropped.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="band-white">
+        <div class="shell py-16 md:py-24">
+          <div class="rule-head">
+            <h2 class="display-sm max-w-[24ch]">What a run actually does.</h2>
+            <span class="tag text-carbon/60">No configuration</span>
+          </div>
+
+          <div class="grid gap-8 md:grid-cols-3">
+            <div class="tile">
+              <span class="tag">Step one</span>
+              <h3 class="font-display text-[30px] leading-[1.05]">Save</h3>
+              <p class="text-[15px] leading-[1.45]">
+                Add your Speexx email and password once. It is encrypted straight away.
+              </p>
+            </div>
+            <div class="tile md:mt-8">
+              <span class="tag">Step two</span>
+              <h3 class="font-display text-[30px] leading-[1.05]">Run</h3>
+              <p class="text-[15px] leading-[1.45]">
+                Press run. It logs in once, then works packet after packet through the level.
+              </p>
+            </div>
+            <div class="tile md:mt-16">
+              <span class="tag">Step three</span>
+              <h3 class="font-display text-[30px] leading-[1.05]">Done</h3>
+              <p class="text-[15px] leading-[1.45]">
+                When the level runs out it stops on its own and tells you it is done.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="band-gray relative overflow-hidden">
+        <svg class="deco pointer-events-none absolute inset-x-0 top-0 h-[180px] w-full" viewBox="0 0 1200 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <g filter="url(#grain-landing)">
+            <path d="M-40 146C240 146 300 44 640 44s340 112 640 76" fill="none" stroke="#000" stroke-width="54" stroke-linecap="round" />
+            <path d="M-40 146C240 146 300 44 640 44s340 112 640 76" fill="none" stroke="#2f7fd1" stroke-width="48" stroke-linecap="round" />
+            <path d="M-40 146C240 146 300 44 640 44s340 112 640 76" fill="none" stroke="#4da2ff" stroke-width="40" stroke-linecap="round" />
+            <path d="M-40 137C240 137 300 35 640 35s340 112 640 76" fill="none" stroke="#a8d8ff" stroke-width="9" stroke-linecap="round" />
+          </g>
+        </svg>
+
+        <div class="shell relative pt-20 pb-16 md:pt-24 md:pb-24">
+          <div class="flex flex-wrap items-end justify-between gap-6">
+            <h2 class="display-sm max-w-[26ch]">Safe by construction, not by luck.</h2>
+            <svg class="deco h-16 w-16 -rotate-6" viewBox="0 0 64 64" aria-hidden="true"><use href="#st-flag" /></svg>
+          </div>
+
+          <div class="mt-10 grid gap-6 md:grid-cols-2">
+            <div class="card">
+              <h3 class="font-display text-[24px] leading-[1.1]">A wrong password stops dead</h3>
+              <p class="mt-3 text-[14px] leading-[1.5]">
+                Credentials are checked before a run starts. A wrong password is never resubmitted
+                — that is what locks an address out of the portal — and that account is paused for
+                a while instead.
+              </p>
+            </div>
+            <div class="card md:mt-8">
+              <h3 class="font-display text-[24px] leading-[1.1]">Runs are kept apart</h3>
+              <p class="mt-3 text-[14px] leading-[1.5]">
+                Each run gets its own browser fingerprint and starts at least fifteen seconds
+                after the last one, so simultaneous logins never look like an attack.
+              </p>
+            </div>
+            <div class="card">
+              <h3 class="font-display text-[24px] leading-[1.1]">Yours stays yours</h3>
+              <p class="mt-3 text-[14px] leading-[1.5]">
+                Every query is filtered by account on the server. There is no URL that shows you
+                somebody else's saved login or run.
+              </p>
+            </div>
+            <div class="card md:mt-8">
+              <h3 class="font-display text-[24px] leading-[1.1]">Nothing leaks into logs</h3>
+              <p class="mt-3 text-[14px] leading-[1.5]">
+                Passwords are passed in on standard input, never on a command line, and are
+                scrubbed out of everything that gets written down.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-12 flex flex-wrap items-center gap-3">
+            <svg class="deco h-14 w-14 rotate-6" viewBox="0 0 64 64" aria-hidden="true"><use href="#st-check" /></svg>
+            <a class="btn btn-filled" href="/signup">Get an account</a>
+            <a class="btn btn-ghost" href="/login">Sign in</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="band-white">
+      <div class="shell flex flex-wrap items-center justify-between gap-4 py-8">
+        <p class="tag">Speexx Panel — runs on its owner's machine</p>
+        <a class="tag underline underline-offset-4" href="/login">Sign in</a>
+      </div>
+    </footer>
+
+    <script src="/landing.js" type="module"></script>
+  </body>
+</html>

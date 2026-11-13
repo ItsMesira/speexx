@@ -1,0 +1,744 @@
+/* Speexx Panel — "Slush" sticker-book system.
+   Tokens are transcribed verbatim from the supplied style reference. Two
+   adaptations are deliberate and recorded in AGENTS.md:
+   1. Display sizes use clamp(token, vw, token) so the huge type scales down
+      instead of overflowing. Weight/leading stay exactly as specified.
+   2. Lateral and Aeonik Pro are commercial. Anton (display) and Inter (UI)
+      are self-hosted substitutes; --font-lateral keeps its real name so a
+      licensed face is a one-line swap. */
+
+@import "tailwindcss";
+
+/* v4 auto-detects sources relative to THIS file, which lives in web/. The markup
+   is in ../static, so without this every utility gets purged and the page
+   renders unstyled. */
+@source "../static";
+
+@theme {
+  /* Colors — verbatim from the reference */
+  --color-carbon: #000000;
+  --color-paper-white: #ffffff;
+  --color-sky-wash: #dceeff;
+  --color-concrete-gray: #cccccc;
+  --color-soft-mist: #e9e9e9;
+  --color-electric-blue: #4da2ff;
+  --color-mint-pop: #55db9c;
+  --color-lavender: #e9ccff;
+  --color-ember: #fb4903;
+  --color-sunburst: #ffd731;
+  --color-voltage-violet: #5c4ade;
+
+  /* Typography */
+  --font-lateral: "Lateral", "Anton", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-aeonik-pro: "Aeonik Pro", "Inter", ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono-key: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+
+  /* Type scale — verbatim */
+  --text-caption: 12px;
+  --leading-caption: 1.56;
+  --tracking-caption: -0.01px;
+  --text-body-lg: 15px;
+  --leading-body-lg: 1.39;
+  --tracking-body-lg: -0.01px;
+  --text-subheading: 24px;
+  --leading-subheading: 1.2;
+  --tracking-subheading: -0.01px;
+  --text-heading-sm: 30px;
+  --leading-heading-sm: 1.1;
+  --tracking-heading-sm: -0.01px;
+  --text-heading: 64px;
+  --leading-heading: 1;
+  --tracking-heading: -0.01px;
+  --text-display: 200px;
+  --leading-display: 0.8;
+  --tracking-display: 0px;
+  --text-display-lg: 640px;
+  --leading-display-lg: 0.75;
+  --tracking-display-lg: 0px;
+
+  /* Weights */
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Spacing — see the note below. Deliberately NOT in @theme. */
+
+  /* Radius — the reference's named radii, plus semantic aliases used below */
+  --radius-2xl: 16px;
+  --radius-2xl-2: 20px;
+  --radius-3xl: 30px;
+  --radius-3xl-2: 40px;
+  --radius-nav: 1600px;
+  --radius-body: 30px;
+  --radius-cards: 20px;
+  --radius-pills: 1600px;
+  --radius-buttons: 1600px;
+  --radius-wallet-icon: 16px;
+  --radius-cards-elevated: 40px;
+  --radius-pill: 1600px;
+  --radius-card: 20px;
+  --radius-card-lg: 40px;
+}
+
+/* The reference's spacing scale, transcribed verbatim, kept OUT of @theme on
+   purpose. Tailwind v4 derives its padding, margin, size and gap utilities from
+   tokens named --spacing-[name], so declaring --spacing-16: 16px inside @theme
+   redefines the entire scale: `h-16` becomes 16px instead of 64px and `mt-12`
+   becomes 12px instead of 48px. These live in plain :root so they stay
+   documented and readable via var(), while Tailwind's own multiplier keeps
+   working as the markup expects. */
+:root {
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-28: 28px;
+  --spacing-32: 32px;
+  --spacing-44: 44px;
+  --spacing-48: 48px;
+  --spacing-60: 60px;
+  --spacing-80: 80px;
+  --spacing-128: 128px;
+  --spacing-180: 180px;
+  --spacing-224: 224px;
+}
+
+@layer base {
+  html,
+  body {
+    /* clip, not hidden: hidden on body propagates to the viewport and leaves
+       body itself visible, so it removes the scrollbar while the overflow is
+       still there (full-page screenshots then capture the extra width). */
+    overflow-x: clip;
+  }
+
+  html {
+    /* Reference: do not constrain below 1280px; these are the floor values that
+       actually matter at small widths. */
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-paper-white);
+    color: var(--color-carbon);
+    font-family: var(--font-aeonik-pro);
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body-lg);
+    letter-spacing: var(--tracking-body-lg);
+    font-weight: var(--font-weight-medium);
+    font-feature-settings: "ss01" on, "tnum" on;
+    /* Anton carries its own black weight; pretending to be 800 makes the
+       browser synthesise a smear. Lateral would use 800 here. */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Display voice — Anton is the self-hosted Lateral substitute. */
+  .font-display {
+    font-family: var(--font-lateral);
+    font-weight: 400;
+  }
+
+  /* ── Browser surfaces ───────────────────────────────────────────────
+     The parts we did not draw still have to belong to the design. */
+  ::selection {
+    background: var(--color-sunburst);
+    color: var(--color-carbon);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-carbon);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-soft-mist);
+    border-left: 1px solid var(--color-carbon);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-carbon);
+    border: 3px solid var(--color-soft-mist);
+    border-radius: 1600px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ember);
+  }
+
+  input,
+  textarea,
+  button {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+
+  /* The caret is ours too. */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    caret-color: var(--color-ember);
+  }
+
+  /* Numbers that change in place must not jitter. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" on;
+  }
+}
+
+@layer components {
+  /* ── Bands ────────────────────────────────────────────────────────────
+     Sections are colour bands only. No dividers, no shadows. */
+  .band-sky {
+    background: var(--color-sky-wash);
+  }
+  .band-white {
+    background: var(--color-paper-white);
+  }
+  .band-gray {
+    background: var(--color-concrete-gray);
+  }
+
+  /* ── Display type ─────────────────────────────────────────────────────
+     Reference sizes are the cap; clamp() keeps them usable below. */
+  .display,
+  .display-lg,
+  .display-md {
+    font-family: var(--font-lateral);
+    font-weight: 400;
+    font-size: clamp(56px, 9vw, 140px);
+    line-height: 0.8;
+    color: var(--color-carbon);
+  }
+
+.display-sm {
+    text-wrap: balance;
+  }
+
+  .lede,
+  .card p {
+    text-wrap: pretty;
+  }
+
+  .display {
+    font-family: var(--font-lateral);
+    font-weight: 400;
+    font-size: clamp(56px, 13vw, var(--text-display));
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    color: var(--color-carbon);
+  }
+
+  /* A six digit key. Monospaced and widely tracked so the digits can be read
+     aloud and typed back without ambiguity, and bounded so it cannot overflow
+     its card the way .display-lg did. */
+  .keycode {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1.1;
+    letter-spacing: 0.22em;
+    color: var(--color-carbon);
+  }
+
+  /* For words rather than digits: "By approval" at .display-sm wrapped to two
+     lines and pushed past the bottom of its tile. */
+  .display-xs {
+    font-family: var(--font-lateral);
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+
+  .display-lg {
+    font-family: var(--font-lateral);
+    font-weight: 400;
+    font-size: clamp(72px, 21vw, var(--text-display-lg));
+    line-height: var(--leading-display-lg);
+    letter-spacing: var(--tracking-display-lg);
+    color: var(--color-carbon);
+  }
+
+  .display-md {
+    font-family: var(--font-lateral);
+    font-weight: 400;
+    font-size: clamp(56px, 9vw, 140px);
+    line-height: 0.8;
+    color: var(--color-carbon);
+  }
+
+.display-sm {
+    font-family: var(--font-lateral);
+    font-weight: 400;
+    font-size: clamp(38px, 7vw, var(--text-heading));
+    line-height: 0.82;
+    color: var(--color-carbon);
+  }
+
+  /* ── Marquee banner ─────────────────────────────────────────────────── */
+  .marquee {
+    background: var(--color-carbon);
+    color: var(--color-paper-white);
+    overflow: hidden;
+    padding: 0;
+    border-top: 1px solid var(--color-carbon);
+    border-bottom: 1px solid var(--color-carbon);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 38s linear infinite;
+  }
+
+  .marquee-item {
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.032em;
+    text-transform: uppercase;
+    padding: 9px 0;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+    padding-right: 28px;
+  }
+
+  .marquee-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 1600px;
+    background: var(--color-sunburst);
+  }
+
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ── Buttons ──────────────────────────────────────────────────────────
+     Reference: buttons are pill-shaped, black-fill or outlined-black only.
+     #4da2ff is never an action colour. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: var(--radius-buttons);
+    border: 1px solid var(--color-carbon);
+    font-size: 13px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.032em;
+    text-transform: uppercase;
+    padding: 11px 18px;
+    cursor: pointer;
+    transition:
+      transform 120ms cubic-bezier(0.2, 0.8, 0.3, 1),
+      background-color 120ms ease,
+      color 120ms ease;
+  }
+
+  .btn:active {
+    transform: translateY(2px);
+  }
+
+  .btn-filled {
+    background: var(--color-carbon);
+    color: var(--color-paper-white);
+  }
+
+  .btn-filled:hover {
+    background: var(--color-ember);
+    color: var(--color-carbon);
+  }
+
+  .btn-ghost {
+    background: var(--color-paper-white);
+    color: var(--color-carbon);
+  }
+
+  .btn-ghost:hover {
+    background: var(--color-lavender);
+  }
+
+  .btn[disabled],
+  .btn[aria-disabled="true"] {
+    background: var(--color-soft-mist);
+    color: #6b6b6b;
+    border-color: #9a9a9a;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Nav pills */
+  .nav-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-nav);
+    border: 1px solid var(--color-carbon);
+    background: var(--color-paper-white);
+    color: var(--color-carbon);
+    font-size: 13px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.032em;
+    text-transform: uppercase;
+    padding: 9px 15px;
+    text-decoration: none;
+    transition: background-color 120ms ease;
+  }
+
+  .nav-pill:hover {
+    background: var(--color-mint-pop);
+  }
+
+  .nav-pill[aria-current="page"] {
+    background: var(--color-carbon);
+    color: var(--color-paper-white);
+  }
+
+  /* ── Cards ────────────────────────────────────────────────────────────
+     Radius floor is 16px per the reference. Never a shadow — elevation is
+     communicated with the black outline and the band behind it. */
+  .card {
+    background: var(--color-paper-white);
+    border: 1px solid var(--color-carbon);
+    border-radius: var(--radius-card);
+    padding: var(--spacing-24);
+  }
+
+  .card-lg {
+    border-radius: var(--radius-card-lg);
+  }
+
+  .card-sky {
+    background: var(--color-sky-wash);
+  }
+  .card-lav {
+    background: var(--color-lavender);
+  }
+  .card-mint {
+    background: var(--color-mint-pop);
+  }
+  .card-gray {
+    background: var(--color-concrete-gray);
+  }
+  .card-sun {
+    background: var(--color-sunburst);
+  }
+  .card-ember {
+    background: var(--color-ember);
+  }
+
+  /* The reference's QR download card treatment, reused for the mint-key card:
+     saturated fill, white inner panel, hard black hairline. align-self keeps it
+     hugging its own content instead of stretching to a tall grid row. */
+  .card-violet {
+    background: var(--color-voltage-violet);
+    color: var(--color-paper-white);
+    border: 1px solid var(--color-carbon);
+    border-radius: var(--radius-card);
+    padding: 14px;
+    align-self: start;
+  }
+
+  .panel-inset {
+    background: var(--color-paper-white);
+    color: var(--color-carbon);
+    border: 1px solid var(--color-carbon);
+    border-radius: 12px;
+  }
+
+  /* ── Fields ─────────────────────────────────────────────────────────── */
+  .field {
+    width: 100%;
+    background: var(--color-paper-white);
+    border: 1px solid var(--color-carbon);
+    border-radius: var(--radius-card);
+    padding: 13px 16px;
+    font-size: 15px;
+    line-height: 1.39;
+  }
+
+  .field::placeholder {
+    color: #767676; /* 4.6:1 on white — secondary text tinted, never pure gray */
+  }
+
+  .field:focus-visible {
+    outline: 3px solid var(--color-carbon);
+    outline-offset: 2px;
+  }
+
+  /* The key field is data entry, not decoration: monospace, wide tracking,
+     tabular, fixed cell so 6 characters never reflow as you type. */
+  .field-key {
+    font-family: var(--font-mono-key);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 16px 12px 16px 22px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .field-key::placeholder {
+    letter-spacing: 0.34em;
+    font-size: 20px;
+  }
+
+  /* ── Labels ─────────────────────────────────────────────────────────
+     Nav / button / uppercase label tracking from the reference. */
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.032em;
+    text-transform: uppercase;
+    color: var(--color-carbon);
+  }
+
+  .lede {
+    font-size: var(--text-subheading);
+    line-height: var(--leading-subheading);
+    letter-spacing: var(--tracking-subheading);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* ── Status stickers ──────────────────────────────────────────────────
+     The reference forbids green as a success state, so job state is carried
+     by sticker shape + a text label. Colour is never the only signal. */
+  .pill-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--color-carbon);
+    border-radius: var(--radius-pills);
+    background: var(--color-paper-white);
+    padding: 6px 14px 6px 8px;
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.032em;
+    text-transform: uppercase;
+  }
+
+  .pill-state .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 1600px;
+    border: 1px solid var(--color-carbon);
+    flex: none;
+  }
+
+  .st-dot-blue {
+    background: var(--color-electric-blue);
+  }
+  .st-dot-sun {
+    background: var(--color-sunburst);
+  }
+  .st-dot-ember {
+    background: var(--color-ember);
+  }
+  .st-dot-gray {
+    background: var(--color-soft-mist);
+  }
+  .st-dot-lav {
+    background: var(--color-lavender);
+  }
+  .st-dot-mint {
+    background: var(--color-mint-pop);
+  }
+
+  /* ── Log ────────────────────────────────────────────────────────────
+     Monospace because it is genuinely code/measurement output. */
+  .logbox {
+    background: var(--color-carbon);
+    color: #d7d7d7;
+    border: 1px solid var(--color-carbon);
+    border-radius: var(--radius-card);
+    padding: 16px 18px;
+    font-family: var(--font-mono-key);
+    font-size: 12px;
+    line-height: 1.62;
+    height: 260px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .logbox .lg-ok {
+    color: #7ee2a8;
+  }
+  .logbox .lg-bad {
+    color: #ff9b7a;
+  }
+  .logbox .lg-done {
+    color: var(--color-sunburst);
+    font-weight: 700;
+  }
+
+  /* ── App shell ───────────────────────────────────────────────────────
+     A tool needs a nav that persists and a container that stops the display
+     type from running off the edge. */
+  .shell {
+    margin-inline: auto;
+    width: 100%;
+    max-width: var(--page-max-width, 1440px);
+    padding-inline: 24px;
+  }
+
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 40px;
+    }
+  }
+
+  .nav-shell {
+    background: var(--color-paper-white);
+    border-bottom: 1px solid var(--color-carbon);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--color-carbon);
+    border-radius: var(--radius-pills);
+    background: var(--color-lavender);
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.032em;
+    text-transform: uppercase;
+    max-width: 42ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── Cards on a grid ───────────────────────────────────────────────── */
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: var(--color-paper-white);
+    border: 1px solid var(--color-carbon);
+    border-radius: var(--radius-cards);
+    padding: var(--spacing-24);
+  }
+
+  .tile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 6px;
+  }
+
+  /* ── Empty state ────────────────────────────────────────────────────
+     Designed rather than apologetic: a sticker, a line, and the one action
+     that fills the space. */
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    border: 1px dashed var(--color-carbon);
+    border-radius: var(--radius-cards);
+    background: var(--color-soft-mist);
+    padding: 36px 24px;
+  }
+
+  /* ── Inline message ──────────────────────────────────────────────────── */
+  .banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border: 1px solid var(--color-carbon);
+    border-radius: var(--radius-2xl);
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .banner-info { background: var(--color-sky-wash); }
+  .banner-ok   { background: var(--color-mint-pop); }
+  .banner-warn { background: var(--color-sunburst); }
+  .banner-bad  { background: var(--color-ember); }
+
+  /* ── Read-only key / id chips ────────────────────────────────────────── */
+  .mono-chip {
+    display: inline-block;
+    font-family: var(--font-mono-key);
+    font-size: 12px;
+    background: var(--color-soft-mist);
+    border: 1px solid var(--color-carbon);
+    border-radius: var(--radius-wallet-icon);
+    padding: 3px 9px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Small caps section heading ───────────────────────────────────────── */
+  .rule-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--color-carbon);
+    padding-top: 14px;
+    margin-bottom: 18px;
+  }
+
+  /* ── Misc ───────────────────────────────────────────────────────────── */
+  .rule {
+    border: 0;
+    border-top: 1px solid var(--color-carbon);
+  }
+
+  .key-glyph {
+    font-family: var(--font-mono-key);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Wrapper for the inline SVG ribbon / stickers. */
+  .deco {
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .marquee-track {
+    animation: none;
+  }
+  .btn {
+    transition: none;
+  }
+  .btn:active {
+    transform: none;
+  }
+}

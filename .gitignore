@@ -1,0 +1,18 @@
+# Credentials never leave the machine. Accounts.md / alluser.md hold Speexx
+# passwords and must never be committed — not even the filled-in cloud copies.
+Accounts.md
+alluser.md
+
+# Runtime state and installs
+.venv/
+__pycache__/
+data/
+*.log
+*.log.console
+
+# Only needed to rebuild static/app.css; app.css is committed
+web/node_modules/
+
+# Tool noise
+.DS_Store
+.opencode/

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://unmailable-unconsecrated-emelina.ngrok-free.dev",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "destination": "https://unmailable-unconsecrated-emelina.ngrok-free.dev",
+      "permanent": false
+    }
+  ]
+}

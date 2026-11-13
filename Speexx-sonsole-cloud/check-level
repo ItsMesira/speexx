@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# check-level — report the CEFR level (A1..C2) of every account in Accounts.md.
+# Usage: ./check-level [accounts_file] [--headed]
+# Stop the AutoCycle bot first (./stop.sh): a running session holds the
+# account's profile dir and the check cannot open it while locked.
+set -euo pipefail
+DIR="$(cd "$(dirname "$0")" && pwd)"
+exec "$DIR/.venv/bin/python" "$DIR/check_level.py" "$@"

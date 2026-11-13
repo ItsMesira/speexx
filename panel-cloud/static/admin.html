@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin — Speexx Panel</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/fonts.css" />
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div class="marquee" role="presentation">
+      <div class="marquee-track" data-marquee>
+        <span class="marquee-item">Admin only <span class="marquee-dot"></span></span>
+        <span class="marquee-item">One key, one level <span class="marquee-dot"></span></span>
+        <span class="marquee-item">Every run is visible <span class="marquee-dot"></span></span>
+      </div>
+    </div>
+
+    <!-- Shown instead of the console when nobody is signed in. -->
+    <section class="band-sky hidden min-h-[calc(100dvh-40px)] flex items-center" id="gate">
+      <div class="shell py-16 md:py-20">
+        <div class="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+          <div>
+            <h1 class="display select-none">ADMIN.</h1>
+            <p class="mt-6 max-w-[38ch] text-[15px] leading-[1.5]">
+              This is the control room. Sign in with an admin name and you get
+              the people list, every run on this machine, and the paused
+              addresses — without going anywhere near the user pages.
+            </p>
+          </div>
+          <form class="card card-lav card-lg" id="gate-form" novalidate>
+            <div class="flex flex-col gap-4">
+              <label class="block">
+                <span class="tag text-carbon/70">Admin name</span>
+                <input class="field mt-2" id="gate-username" name="username"
+                       autocomplete="username" autocapitalize="none" spellcheck="false"
+                       placeholder="admin" />
+              </label>
+              <label class="block">
+                <span class="tag text-carbon/70">Password</span>
+                <input class="field mt-2" type="password" id="gate-password"
+                       name="password" autocomplete="current-password"
+                       placeholder="••••••••" />
+              </label>
+              <button class="btn btn-filled w-full py-[15px] text-[14px]"
+                      type="submit" id="gate-submit">Sign in as admin</button>
+              <div id="gate-msg"></div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <div id="console">
+    <header class="nav-shell">
+      <nav class="shell flex flex-wrap items-center gap-3 py-4 md:gap-4">
+        <span class="flex items-center gap-3">
+          <span class="flex h-11 w-11 items-center justify-center rounded-full border border-carbon bg-paper-white font-display text-[22px] leading-none">P</span>
+          <span class="tag hidden sm:inline">Admin</span>
+        </span>
+        <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+          <span class="chip" id="who">…</span>
+          <button class="btn btn-ghost" type="button" id="signout">Sign out</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="band-gray relative overflow-hidden">
+        <svg class="deco pointer-events-none absolute inset-x-0 top-0 h-[180px] w-full" viewBox="0 0 1200 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <g filter="url(#grain)">
+            <path d="M-40 146C240 146 300 44 640 44s340 112 640 76" fill="none" stroke="#000" stroke-width="54" stroke-linecap="round" />
+            <path d="M-40 146C240 146 300 44 640 44s340 112 640 76" fill="none" stroke="#2f7fd1" stroke-width="48" stroke-linecap="round" />
+            <path d="M-40 146C240 146 300 44 640 44s340 112 640 76" fill="none" stroke="#4da2ff" stroke-width="40" stroke-linecap="round" />
+            <path d="M-40 137C240 137 300 35 640 35s340 112 640 76" fill="none" stroke="#a8d8ff" stroke-width="9" stroke-linecap="round" />
+          </g>
+        </svg>
+
+        <div class="shell relative pt-20 pb-14 md:pt-24">
+          <div class="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <h1 class="display select-none">ADMIN.</h1>
+              <p class="mt-6 max-w-[46ch] text-[15px] leading-[1.5]" id="lede">Loading…</p>
+            </div>
+            <svg class="deco h-16 w-16 -rotate-6" viewBox="0 0 64 64" aria-hidden="true"><use href="#st-people" /></svg>
+          </div>
+
+          <div class="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" id="stats"></div>
+        </div>
+      </section>
+
+      <section class="band-white">
+        <div class="shell py-16 md:py-20">
+          <div class="rule-head">
+            <h2 class="display-sm max-w-[20ch]">People and keys.</h2>
+            <span class="tag text-carbon/60" id="user-note"></span>
+          </div>
+          <div id="users" class="flex flex-col gap-3"></div>
+        </div>
+      </section>
+
+      <section class="band-sky">
+        <div class="shell py-16 md:py-20">
+          <div class="grid gap-10 lg:grid-cols-2 lg:gap-12">
+            <div>
+              <div class="rule-head !mt-0">
+                <h2 class="display-sm max-w-[20ch]">Runs, everyone.</h2>
+                <span class="tag text-carbon/60" id="job-note"></span>
+              </div>
+              <div id="jobs" class="flex flex-col gap-3"></div>
+            </div>
+            <div>
+              <div class="rule-head !mt-0">
+                <h2 class="display-sm max-w-[20ch]">Paused accounts.</h2>
+              </div>
+              <div id="cooldowns" class="flex flex-col gap-3"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    </div>
+
+    <script src="/admin.js" type="module"></script>
+  </body>
+</html>

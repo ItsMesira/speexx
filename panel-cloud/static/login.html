@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in — Speexx Panel</title>
+    <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/fonts.css" />
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body class="band-sky">
+    <main class="shell flex min-h-screen flex-col justify-center py-16">
+      <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-center lg:gap-20">
+        <div>
+          <a href="/" class="inline-flex items-center gap-3 no-underline">
+            <span class="flex h-11 w-11 items-center justify-center rounded-full border border-carbon bg-paper-white font-display text-[22px] leading-none">P</span>
+            <span class="tag">Speexx Panel</span>
+          </a>
+          <h1 class="display-md mt-10 select-none">BACK<br />IN.</h1>
+          <p class="lede mt-8 max-w-[38ch]">
+            Sign in to see your saved Speexx accounts and start a run. Your own accounts only —
+            there is no URL that shows you anybody else's.
+          </p>
+          <div class="mt-10 flex flex-wrap gap-6">
+            <div class="flex items-start gap-3">
+              <svg class="deco h-10 w-10 shrink-0 -rotate-6" viewBox="0 0 64 64" aria-hidden="true"><use href="#st-lock" /></svg>
+              <p class="max-w-[24ch] text-[14px] leading-[1.45]">Repeated wrong passwords pause that account, they never retry.</p>
+            </div>
+            <div class="flex items-start gap-3">
+              <svg class="deco h-10 w-10 shrink-0 rotate-6" viewBox="0 0 64 64" aria-hidden="true"><use href="#st-key" /></svg>
+              <p class="max-w-[24ch] text-[14px] leading-[1.45]">Saved passwords are encrypted and never reach a log.</p>
+            </div>
+          </div>
+        </div>
+
+        <form class="card card-lav card-lg" id="form" novalidate>
+          <h2 class="display-sm">Sign in.</h2>
+
+          <div class="mt-6 flex flex-col gap-5">
+            <label class="flex flex-col gap-2">
+              <span class="tag">Username</span>
+              <input class="field" type="text" id="username" name="username"
+                     autocomplete="username" autocapitalize="none" spellcheck="false"
+                     required maxlength="254" placeholder="your name" />
+            </label>
+
+            <label class="flex flex-col gap-2">
+              <span class="tag">Password</span>
+              <input class="field" type="password" id="password" name="password"
+                     autocomplete="current-password" required maxlength="200"
+                     placeholder="••••••••••" />
+            </label>
+
+            <button class="btn btn-filled w-full py-[15px] text-[14px]" type="submit" id="submit">
+              Sign in
+            </button>
+
+            <div id="msg"></div>
+
+            <p class="text-[13px] text-carbon/80">
+              No account yet? <a class="underline underline-offset-4" href="/signup">Create one</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script src="/login.js" type="module"></script>
+  </body>
+</html>

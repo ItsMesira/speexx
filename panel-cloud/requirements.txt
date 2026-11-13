@@ -1,0 +1,12 @@
+# Pinned to the versions this was built and verified against.
+fastapi==0.142.2
+starlette==1.7.0
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+# Browser automation for runner.py. The revision must match the build in
+# ~/Library/Caches/ms-playwright or every launch dies with "Executable doesn't
+# exist" — run `.venv/bin/python -m playwright install chromium` if so.
+playwright==1.62.0
+# AES-256-GCM for Speexx passwords at rest (vault.py). The stdlib has no AEAD,
+# and a saved account must never be readable as plain text in panel.db.
+cryptography==50.0.2

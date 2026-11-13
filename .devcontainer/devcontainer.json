@@ -1,0 +1,21 @@
+{
+  "name": "Speexx bots (sonsole + panel)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {}
+  },
+  "forwardPorts": [8787],
+  "portsAttributes": {
+    "8787": {
+      "label": "Speexx panel",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "bash Speexx-sonsole-cloud/cloud_setup.sh && bash panel-cloud/cloud_setup.sh",
+  "remoteUser": "vscode",
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["README.md"]
+    }
+  }
+}
