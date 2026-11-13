@@ -11,7 +11,20 @@ PY="${PYTHON:-python3}"
 
 if [ ! -x ".venv/bin/python" ]; then
   echo "[cloud] creating virtualenv"
-  "$PY" -m venv .venv
+  rm -rf .venv
+  if ! "$PY" -m venv .venv 2>/dev/null; then
+    # Colab's Debian Python has no working ensurepip — build the venv without
+    # pip and bootstrap it with get-pip.py instead.
+    echo "[cloud] venv+ensurepip failed; retrying without bundled pip"
+    rm -rf .venv
+    "$PY" -m venv --without-pip .venv
+    curl -fsSL https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
+    .venv/bin/python /tmp/get-pip.py -q
+  fi
+fi
+if [ ! -x ".venv/bin/pip" ]; then
+  echo "[cloud] ERROR: no .venv/bin/pip after bootstrap; aborting"
+  exit 1
 fi
 
 echo "[cloud] installing python dependencies"
