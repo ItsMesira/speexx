@@ -32,6 +32,37 @@ PORTAL = "https://portal.speexx.com"
 DEFAULT_ACCOUNTS = Path(__file__).absolute().parent / "Accounts.md"
 CEFR_RE = re.compile(r"\b[ABC][12](?:\.\d)?\b")
 
+# The article's /results page shows progress rows localized per account
+# language. The row this tool reports is the exercises one — Thai label first
+# (the sp.ac.th portal serves Thai), then a few other locales as fallbacks.
+RESULT_LABELS = ["แบบฝึกหัด", "Exercises", "Übungen", "Ejercicios",
+                 "Exercícios", "练习", "演習", "연습"]
+
+_EXERCISE_PCT_JS = """
+(labels) => {
+  let best = null;
+  for (const el of document.querySelectorAll('body *')) {
+    const t = el.textContent || '';
+    if (!t || t.length > 400) continue;
+    for (const label of labels) {
+      if (t.includes(label)) {
+        if (!best || t.length < best.len) { best = el; best.len = t.length; }
+        break;
+      }
+    }
+  }
+  if (!best) return null;
+  // The % may live in the same node, a sibling, or a parent row — walk up.
+  let scope = best;
+  for (let i = 0; i < 4 && scope; i++) {
+    const m = (scope.textContent || '').match(/(\\d+)\\s*%/);
+    if (m) return m[1] + '%';
+    scope = scope.parentElement;
+  }
+  return null;
+}
+"""
+
 
 # ── Cloud / no-display launch options — mirrors speexx_autocycle.py ────────
 def _running_in_cloud():
@@ -129,9 +160,32 @@ def scan_dom_level(page):
     return m.group(0) if m else None
 
 
+def exercises_pct(page, article_id):
+    """Open /articles/<id>/results and read the exercises progress row
+    (e.g. Thai 'แบบฝึกหัด 0%'). Returns the percentage string or None."""
+    if not article_id:
+        return None
+    try:
+        page.goto("%s/articles/%s/results" % (PORTAL, article_id),
+                  timeout=30000, wait_until="domcontentloaded")
+    except Exception as e:
+        log("  results goto error: %s" % str(e)[:60])
+    deadline = time.time() + 12
+    while time.time() < deadline:
+        try:
+            pct = page.evaluate(_EXERCISE_PCT_JS, RESULT_LABELS)
+        except Exception:
+            pct = None
+        if pct:
+            return pct
+        time.sleep(0.5)
+    return None
+
+
 def check_account(pw, email, password, headed=False):
-    """Returns (level, course, status). level/course may be None; status is one
-    of 'ok', 'login failed', 'no level found', 'profile busy', 'error'."""
+    """Returns (level, course, exercises_pct, status). All but status may be
+    None; status is one of 'ok', 'login failed', 'no level found',
+    'profile busy', 'error'."""
     import playwright._impl._errors as pwe  # noqa: E402  (local: cheap import)
 
     captured = {}   # url path -> parsed initial-data JSON
@@ -151,8 +205,8 @@ def check_account(pw, email, password, headed=False):
     except Exception as e:
         if "ProcessSingleton" in str(e) or "SingletonLock" in str(e) or \
                 "Failed to launch" in str(e):
-            return (None, None, "profile busy (bot running?)")
-        return (None, None, "error: %s" % str(e)[:80])
+            return (None, None, None, "profile busy (bot running?)")
+        return (None, None, None, "error: %s" % str(e)[:80])
     try:
         page = ctx.pages[0] if ctx.pages else ctx.new_page()
         page.on("response", on_response)
@@ -161,7 +215,7 @@ def check_account(pw, email, password, headed=False):
         except Exception as e:
             log("  goto error: %s" % str(e)[:80])
         if not do_login(page, email, password):
-            return (None, None, "login failed (bad password?)")
+            return (None, None, None, "login failed (bad password?)")
 
         # Wait for the app to land on /articles/<id> and fire initial-data.
         deadline = time.time() + 20
@@ -174,31 +228,49 @@ def check_account(pw, email, password, headed=False):
             if data:
                 break
             time.sleep(0.5)
+        # Article id: from the initial-data response path, else the current URL.
+        article_id = None
+        for p in captured:
+            m = re.match(r"^/articles/(\d+)/", p)
+            if m:
+                article_id = m.group(1)
+                break
+        if not article_id:
+            m = re.search(r"/articles/(\d+)", urlparse(page.url).path)
+            if m:
+                article_id = m.group(1)
+
         if data:
             lvl = data.get("currentLevel")
             course = (data.get("courseLanguageUsage") or {}).get("englishName") \
                 or (data.get("courseLanguageUsage") or {}).get("name")
-            return (lvl, course, "ok")
+            return (lvl, course, exercises_pct(page, article_id), "ok")
 
         # Fallback: whatever URL we're on, ask for its initial-data directly;
-        # then fall back to a DOM scan.
+        # then a DOM scan (run while still on the article page — the /results
+        # navigation below changes the document).
+        url_path = urlparse(page.url).path
+        lvl = course_fb = status_fb = None
         try:
-            path = urlparse(page.url).path
-            if "/articles/" in path:
+            if "/articles/" in url_path:
                 d = json.loads(ctx.request.get(
                     page.url.rstrip("/") + "/initial-data").text())
                 if d.get("currentLevel"):
-                    return (d["currentLevel"],
-                            (d.get("courseLanguageUsage") or {}).get("englishName"),
-                            "ok")
+                    lvl = d["currentLevel"]
+                    course_fb = (d.get("courseLanguageUsage") or {}).get("englishName")
+                    status_fb = "ok"
         except Exception:
             pass
-        lvl = scan_dom_level(page)
+        if not lvl:
+            lvl = scan_dom_level(page)
+            if lvl:
+                status_fb = "ok (dom)"
+        pct = exercises_pct(page, article_id)
         if lvl:
-            return (lvl, None, "ok (dom)")
-        return (None, None, "no level found (url: %s)" % urlparse(page.url).path)
+            return (lvl, course_fb, pct, status_fb)
+        return (None, None, pct, "no level found (url: %s)" % url_path)
     except Exception as e:
-        return (None, None, "error: %s" % str(e)[:80])
+        return (None, None, None, "error: %s" % str(e)[:80])
     finally:
         try:
             ctx.close()
@@ -224,20 +296,24 @@ def main():
     with sync_playwright() as pw:
         for n, (email, password) in enumerate(pairs, 1):
             log("(%d/%d) checking %s" % (n, len(pairs), email))
-            level, course, status = check_account(pw, email, password,
-                                                  headed=args.headed)
-            rows.append((email, course, level, status))
+            level, course, exercises, status = check_account(pw, email, password,
+                                                             headed=args.headed)
+            rows.append((email, course, level, exercises, status))
             if status != "ok" or not level:
                 failures.append(email)
-            log("  -> %s  (%s)" % (level or "-", status))
+            log("  -> %s  exercises %s  (%s)"
+                % (level or "-", exercises or "-", status))
 
     print()
-    print("%-34s %-10s %-8s %s" % ("EMAIL", "COURSE", "LEVEL", "STATUS"))
-    print("-" * 78)
-    for email, course, level, status in rows:
-        print("%-34s %-10s %-8s %s" % (email, course or "-", level or "-", status))
-    print("-" * 78)
-    ok = [r for r in rows if r[3].startswith("ok")]
+    header = "%-34s %-10s %-8s %-8s %s" % ("EMAIL", "COURSE", "LEVEL",
+                                           "แบบฝึกหัด", "STATUS")
+    print(header)
+    print("-" * len(header))
+    for email, course, level, exercises, status in rows:
+        print("%-34s %-10s %-8s %-8s %s"
+              % (email, course or "-", level or "-", exercises or "-", status))
+    print("-" * len(header))
+    ok = [r for r in rows if r[4].startswith("ok")]
     log("%d/%d accounts checked OK" % (len(ok), len(rows)))
     if failures:
         log("problems: %s" % ", ".join(failures))

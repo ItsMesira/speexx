@@ -443,6 +443,11 @@ exercises or the solver.
 - **Stop the bot first (`./stop.sh`).** A running AutoCycle session holds the
   account's profile dir; the check reports that account as `profile busy`
   instead of fighting over it. Headless by default; `--headed` to watch.
+- The table has a fourth column, `แบบฝึกหัด`: the exercises progress
+  percentage from the article's own `/results` page (e.g. `0%`). The row is
+  matched by localized label (Thai first, then Exercises/Übungen/Ejercicios/…),
+  so it works on the Thai portal. Found after the level is read by navigating
+  to `/articles/<id>/results`; `-` if the id or row can't be found.
 - Verification on 2026-11-12: all 4 accounts in `Accounts.md` reported
   (B2.1, A2, C1.1, B2.1). A sublevel may be absent — one account reports plain
   `A2` with no `.n` suffix; that is the portal's value, not a parsing gap.
