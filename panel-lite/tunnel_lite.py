@@ -21,10 +21,18 @@ def main() -> int:
 
     conf.get_default().auth_token = token
     port = int(os.environ.get("PORT", "8788"))
+    # Free ngrok accounts get exactly ONE reserved domain, and only one
+    # endpoint may hold it. When NGROK_DOMAIN is set we pin that domain
+    # explicitly (fails loudly if it is already online elsewhere, e.g. a
+    # still-running Colab runtime); otherwise ngrok assigns a random one.
+    domain = os.environ.get("NGROK_DOMAIN", "").strip()
     url_file = Path("lite_data/tunnel-url.txt")
     url_file.parent.mkdir(parents=True, exist_ok=True)
 
-    ngrok.connect(port, "http")
+    if domain:
+        ngrok.connect(port, "http", domain=domain)
+    else:
+        ngrok.connect(port, "http")
     url = ""
     for _ in range(20):
         for t in ngrok.get_tunnels():
