@@ -12,6 +12,8 @@ one whole level, stop it if needed. Same visual theme (the same compiled
 |---|---|
 | `server_lite.py` | FastAPI app: page + JSON API + host allowlist + token gate |
 | `jobctl.py` | sqlite state, runner spawn/stop, stdout-marker parsing, profile lease, stagger, cooldowns |
+| `import_accounts.py` | one-shot seeding of the account list from an Accounts.md-format file (seals passwords; skips existing; never instantiates JobCtl, whose boot() would stop live jobs) |
+| `botwatch.py` | read-only view of the AutoCycle bot's own sessions: tails of `$HOME/speexx_autocycle_multi/session*_*.log.console`, emails parsed from `$HOME/speexx_autocycle_multi_run.log`; served at `GET /api/bot` |
 | `runner.py`, `preflight.py` | byte-copies of panel-cloud's (the cloud/headless variants) |
 | `solver.js`, `solver_check.js` | byte-identical to `Speexx-sonsole-cloud/optimized.js` — verify with `diff` after any copy |
 | `static/` | copied `app.css`/`fonts.css`/`fonts`/favicon from panel-cloud + new `index.html`/`lite.js` |
@@ -66,8 +68,11 @@ one whole level, stop it if needed. Same visual theme (the same compiled
 `PANEL_LITE_TOKEN`, `NGROK_AUTHTOKEN`, `SPEEXX_LITE_PYTHON`,
 `SPEEXX_LITE_ALLOWED_HOSTS`, `SPEEXX_LITE_DATA_DIR`, `SPEEXX_LITE_STAGGER`,
 `SPEEXX_LITE_CYCLE_CAP`, `SPEEXX_LITE_PROFILE_POOL`, `SPEEXX_LITE_RUNNER`
-(test override for the runner path), `LITE_FORCE_BROWSERS=1` (stop.sh also -9s
-playwright Chromium — do this only when no other speexx bot is running).
+(test override for the runner path), `SPEEXX_LITE_ACCOUNTS` (accounts file for
+the run.sh seeding step), `SPEEXX_BOT_LOG_DIR` / `SPEEXX_BOT_MASTER_LOG` (where
+botwatch looks for the sonsole bot's logs),
+`LITE_FORCE_BROWSERS=1` (stop.sh also -9s playwright Chromium — do this only
+when no other speexx bot is running).
 
 ## Python selection (`run.sh`)
 

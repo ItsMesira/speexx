@@ -16,7 +16,9 @@ const TOKEN_KEY = "speexx-lite-token";
 let token = localStorage.getItem(TOKEN_KEY) || "";
 let poll = null;
 let logJobId = null;
+let logBotName = null;
 let lastLogLen = 0;
+let botData = null;
 
 function $(id) { return document.getElementById(id); }
 
@@ -230,7 +232,12 @@ function renderJobs(jobs) {
   for (const job of shown) {
     const tile = el("div", "tile");
     tile.style.cursor = "pointer";
-    tile.addEventListener("click", () => { logJobId = job.id; lastLogLen = 0; refreshLog(); });
+    tile.addEventListener("click", () => {
+      logJobId = job.id;
+      logBotName = null;
+      lastLogLen = 0;
+      refreshLog();
+    });
     tile.append(
       el("span", "tag", job.profile != null ? `device profile ${job.profile}` : "device"),
       el("p", "text-[15px] font-medium break-all", job.email),
@@ -252,11 +259,68 @@ function renderJobs(jobs) {
     host.append(tile);
   }
 
-  if (!logJobId && activeJobs.length) {
+  if (!logJobId && !logBotName && activeJobs.length) {
     logJobId = activeJobs[0].id;
     lastLogLen = 0;
   }
-  $("log-note").textContent = logJobId ? `run #${logJobId}` : "Nothing has run yet.";
+  $("log-note").textContent = logJobId
+    ? `run #${logJobId}`
+    : (logBotName ? logBotName : "Nothing has run yet.");
+}
+
+/* ── bot sessions (read-only view of the AutoCycle supervisor) ──────────── */
+
+function renderBot(bot) {
+  const section = $("bot-section");
+  if (!bot || !bot.present) {
+    section.classList.add("hidden");
+    return;
+  }
+  section.classList.remove("hidden");
+  const sessions = bot.sessions || [];
+  $("bot-note").textContent = sessions.length
+    ? `${sessions.length} session${sessions.length === 1 ? "" : "s"}`
+    : "supervisor is up, no sessions yet";
+  $("bot-hint").textContent = sessions.length
+    ? `Read-only tails of the bot's own logs in ${bot.dir}. Click a session to see its recent output below.`
+    : "";
+  const host = $("bot");
+  host.textContent = "";
+
+  if (!sessions.length) {
+    const empty = el("div", "empty md:col-span-2 xl:col-span-3");
+    empty.append(
+      el("p", "display-sm", "Bot is quiet."),
+      el("p", "text-[14px] leading-[1.5] max-w-[46ch]",
+        "The bot's log directory exists but has no session output yet. Sessions appear here once accounts start cycling."),
+    );
+    host.append(empty);
+    return;
+  }
+
+  for (const s of sessions) {
+    const tile = el("div", "tile");
+    tile.style.cursor = "pointer";
+    tile.addEventListener("click", () => {
+      logJobId = null;
+      logBotName = s.name;
+      lastLogLen = 0;
+      renderLog((s.tail || []).join("\n"));
+      $("log-note").textContent = s.name;
+    });
+    tile.append(
+      el("span", "tag", s.email || s.name),
+      el("p", "text-[15px] font-medium break-all", s.name),
+    );
+    const meta = el("div", "flex flex-wrap items-center gap-2");
+    meta.append(statePill(s.state));
+    meta.append(el("span", "text-[12px] text-carbon/70 tnum", `${ago(s.mtime)}`));
+    tile.append(meta);
+    const last = (s.tail || []).slice(-1)[0] || "";
+    tile.append(el("p", "text-[13px] leading-[1.45] text-carbon/80 break-all",
+      last.slice(0, 180)));
+    host.append(tile);
+  }
 }
 
 /* ── log box ────────────────────────────────────────────────────────────── */
@@ -278,6 +342,17 @@ function renderLog(text) {
 }
 
 async function refreshLog() {
+  if (logBotName && botData) {
+    const s = (botData.sessions || []).find((x) => x.name === logBotName);
+    if (s) {
+      const text = (s.tail || []).join("\n");
+      if (text.length !== lastLogLen) {
+        lastLogLen = text.length;
+        renderLog(text);
+      }
+    }
+    return;
+  }
   if (!logJobId) return;
   try {
     const { log } = await api(`/api/jobs/${logJobId}/log`);
@@ -304,6 +379,11 @@ async function refresh() {
   lastState = data;
   renderAccounts(data.accounts, data.jobs);
   renderJobs(data.jobs);
+  try {
+    botData = await api("/api/bot");
+  } catch { botData = null; }
+  renderBot(botData);
+  if (logBotName && botData) refreshLog();
   $("access-note").textContent = data.access.token_required ? "token-locked" : "private port";
   if (data.access.token_required && !token) showTokenForm();
   refreshLog();

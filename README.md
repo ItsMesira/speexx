@@ -27,6 +27,14 @@ cd panel-lite
 
 - Add a Speexx email + password on the page, press **Run one level** — it
   stops by itself after one whole level.
+- On startup `run.sh` seeds the account list from the bot's
+  `../Speexx-sonsole-cloud/Accounts.md` (skip-overrides: already-saved
+  addresses are kept, nothing is printed but the email).
+- **Bot sessions** shows the AutoCycle supervisor's live sessions read-only
+  (per-session log tails + a rough state pill); click one to read its recent
+  output in the panel's output box. The panel's job table and the bot's
+  sessions are separate worlds — and never run the same account in both at
+  once, or the two sessions knock each other off the portal.
 - Access: a **private Codespaces port needs no token**; a public tunnel gets a
   token (printed once by `run.sh`, remembered by the browser).
 - Same safety rules as the full panel: bad-password runs never retry

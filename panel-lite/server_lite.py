@@ -29,6 +29,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+import botwatch
 import jobctl
 
 HERE = Path(__file__).resolve().parent
@@ -171,6 +172,16 @@ async def job_log(job_id: int, request: Request):
     if not _authorized(request):
         return JSONResponse({"error": "token"}, status_code=401)
     return {"id": job_id, "log": ctl.log_tail(job_id)}
+
+
+@app.get("/api/bot")
+async def bot_sessions(request: Request):
+    """Read-only view of the AutoCycle bot's own supervisor sessions (its
+    per-session log files). The bot runs outside this panel's job table; this
+    is how the page shows everything that is happening on the box."""
+    if not _authorized(request):
+        return JSONResponse({"error": "token"}, status_code=401)
+    return botwatch.sessions()
 
 
 # ── static ───────────────────────────────────────────────────────────────────

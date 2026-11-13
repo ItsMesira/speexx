@@ -55,6 +55,16 @@ if ! "$PY" -c "import playwright" >/dev/null 2>&1; then
   echo "[lite] ERROR: chosen python lacks playwright"; exit 1
 fi
 
+# Seed the panel's account list from the bot's Accounts.md (skips addresses
+# that are already saved). Credentials go straight into the sealed sqlite
+# vault; they are never printed. Override with SPEEXX_LITE_ACCOUNTS=otherfile.
+ACCOUNTS_SRC="${SPEEXX_LITE_ACCOUNTS:-../Speexx-sonsole-cloud/Accounts.md}"
+if [ -s "$ACCOUNTS_SRC" ]; then
+  "$PY" import_accounts.py "$ACCOUNTS_SRC" || true
+else
+  echo "[lite] no accounts file at $ACCOUNTS_SRC — add accounts on the page"
+fi
+
 # Host allowlist: loopback + anything the environment asks for.
 EXTRA="${SPEEXX_LITE_ALLOWED_HOSTS:-}"
 WITH_TUNNEL=0
