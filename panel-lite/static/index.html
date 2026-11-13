@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Speexx Panel Lite — cloud</title>
+    <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="/fonts.css" />
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div class="marquee" role="presentation">
+      <div class="marquee-track" data-marquee>
+        <span class="marquee-item">Add an account, press run <span class="marquee-dot"></span></span>
+        <span class="marquee-item">One whole level, then done <span class="marquee-dot"></span></span>
+        <span class="marquee-item">No keys, no signups <span class="marquee-dot"></span></span>
+      </div>
+    </div>
+
+    <header class="nav-shell">
+      <nav class="shell flex flex-wrap items-center gap-3 py-4 md:gap-4">
+        <span class="flex items-center gap-3 no-underline">
+          <span class="flex h-11 w-11 items-center justify-center rounded-full border border-carbon bg-paper-white font-display text-[22px] leading-none">P</span>
+          <span class="tag hidden sm:inline">Panel Lite</span>
+        </span>
+        <span class="ml-auto chip" id="access-note">…</span>
+      </nav>
+    </header>
+
+    <main>
+      <section class="band-sky">
+        <div class="shell pt-14 pb-16 md:pt-16 md:pb-20">
+          <div class="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <h1 class="display select-none">ADD &amp; RUN.</h1>
+              <p class="lede mt-6 max-w-[42ch]">
+                Save a Speexx login, press run. It works through one whole level,
+                then stops on its own. No keys, no accounts on this panel — the
+                port you reached it through is the gate.
+              </p>
+            </div>
+          </div>
+          <div id="token-slot" class="mt-8 max-w-[52ch] hidden">
+            <form class="card card-lav" id="token-form" novalidate>
+              <p class="tag text-carbon/70">Access token</p>
+              <p class="mt-3 text-[14px] leading-[1.5] text-carbon/85">
+                This panel is token-locked. Paste the token once — the browser
+                remembers it. It was printed by <code>run.sh</code> when the
+                tunnel started.
+              </p>
+              <div class="mt-4 flex flex-wrap items-end gap-3">
+                <label class="block flex-1 min-w-[14rem]">
+                  <span class="tag">Token</span>
+                  <input class="field mt-2" type="password" id="token-input"
+                         autocomplete="off" spellcheck="false" />
+                </label>
+                <button class="btn btn-filled" type="submit" id="token-submit">Unlock</button>
+              </div>
+              <div id="token-msg" class="mt-4"></div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Runs ─────────────────────────────────────────────────────── -->
+      <section class="band-white">
+        <div class="shell py-16 md:py-24">
+          <div class="rule-head">
+            <h2 class="display-sm max-w-[22ch]">Runs.</h2>
+            <span class="tag text-carbon/60" id="job-note"></span>
+          </div>
+          <div id="jobs" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3"></div>
+          <div class="mt-8">
+            <div class="rule-head !mt-0 !mb-4 !border-0 !pt-0">
+              <p class="tag">Output</p>
+              <p class="tag text-carbon/60" id="log-note">Nothing has run yet.</p>
+            </div>
+            <div class="logbox" id="log" tabindex="0" role="log" aria-live="polite" aria-label="Run output"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Saved accounts ───────────────────────────────────────────── -->
+      <section class="band-white !pt-0">
+        <div class="shell pb-16 md:pb-24">
+          <div class="rule-head">
+            <h2 class="display-sm max-w-[22ch]">Speexx accounts.</h2>
+            <span class="tag text-carbon/60" id="account-count"></span>
+          </div>
+          <div id="accounts" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3"></div>
+
+          <form class="card card-lav mt-8" id="add-form" novalidate>
+            <div class="flex flex-wrap items-end gap-5">
+              <label class="flex min-w-[14rem] flex-1 flex-col gap-2">
+                <span class="tag">Speexx email</span>
+                <input class="field" type="email" id="a-email" spellcheck="false" required
+                       maxlength="254" placeholder="learner@school.ac.th" />
+              </label>
+              <label class="flex min-w-[13rem] flex-1 flex-col gap-2">
+                <span class="tag">Speexx password</span>
+                <input class="field" type="password" id="a-pass" autocomplete="off" required
+                       maxlength="200" placeholder="••••••••••" />
+              </label>
+              <button class="btn btn-filled" type="submit" id="a-submit">Save account</button>
+            </div>
+            <div id="add-msg" class="mt-5"></div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="band-sky">
+      <div class="shell py-10 flex flex-wrap items-center justify-between gap-4">
+        <p class="tag text-carbon/70" id="foot-note">Panel Lite — single operator.</p>
+        <p class="tag text-carbon/70">Runs use the same runner and login rules as the full panel.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="/lite.js"></script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+# Pinned to the same versions panel-cloud was built and verified against,
+# because the lite panel prefers the panel-cloud venv and must not fight it.
+fastapi==0.142.2
+starlette==1.7.0
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+playwright==1.62.0
+cryptography==50.0.2
+# Public URL when the panel-cloud tunnel helper isn't reused directly.
+# Unpinned: pyngrok's own CLI binary download governs compatibility.
+pyngrok

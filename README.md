@@ -8,9 +8,30 @@ bot logic here is byte-identical to them, only the environment layer differs.
 |---|---|---|
 | `Speexx-sonsole-cloud/` | standard-packet AutoCycle bot (multi-account) | `cloud_setup.sh`, `start.sh`, `AGENTS.md` |
 | `panel-cloud/` | multi-user web panel + its runner | `cloud_setup.sh`, `run.sh`, `AGENTS.md` |
+| `panel-lite/` | single-operator panel: add account → run → watch. No users, no signup, no keys | `run.sh`, `stop.sh`, `AGENTS.md` |
 
 Per-project docs: `Speexx-sonsole-cloud/CLOUD.md`, `panel-cloud/CLOUD.md`, plus
 the full behavior reference in each folder's `AGENTS.md`.
+
+### Panel Lite — when you just want to add and watch runs
+
+`panel-cloud` assumes several strangers sharing one panel (accounts, keys,
+sessions). If you are the only operator, `panel-lite` is the same theme and the
+same runner with all of that removed:
+
+```bash
+cd panel-lite
+./run.sh 8788        # 127.0.0.1:8788; tunnels via NGROK_AUTHTOKEN if set
+./stop.sh
+```
+
+- Add a Speexx email + password on the page, press **Run one level** — it
+  stops by itself after one whole level.
+- Access: a **private Codespaces port needs no token**; a public tunnel gets a
+  token (printed once by `run.sh`, remembered by the browser).
+- Same safety rules as the full panel: bad-password runs never retry
+  (cooldown instead), one run per address, distinct device profiles, 15 s
+  login stagger. See `panel-lite/AGENTS.md`.
 
 ## Run both at once
 

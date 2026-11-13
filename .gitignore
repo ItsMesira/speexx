@@ -7,6 +7,7 @@ alluser.md
 .venv/
 __pycache__/
 data/
+lite_data/
 *.log
 *.log.console
 
